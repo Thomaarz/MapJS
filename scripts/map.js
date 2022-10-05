@@ -62,6 +62,13 @@ function addMarker(position) {
     markers.push(marker);
 }
 
+function getValue(start, end) {
+    let vectorLng = (end[0] - start[0]);
+    let vectorLat = (end[1] - start[1]);
+
+    return Math.abs(vectorLng) + Math.abs(vectorLat);
+}
+
 function moveCar2(routes) {
     let currentRoute = 0;
 
@@ -77,16 +84,18 @@ function moveCar2(routes) {
     let vectorLng = (nextStart[0] - currentStart[0]) / 100;
     let vectorLat = (nextStart[1] - currentStart[1]) / 100;
 
-    let i = 0;
+    let chrono = 0;
+    let requiredChrono = 100;
+
     let interval = window.setInterval(function () {
-        i++;
+        chrono++;
 
         start = [start[0] + vectorLng, start[1] + vectorLat];
 
         car.setLngLat(start);
 
         // ROUTE FINIE
-        if (i === 100) {
+        if (chrono === requiredChrono) {
             currentRoute++;
         }
 
@@ -97,18 +106,16 @@ function moveCar2(routes) {
         }
 
         // ROUTE FINIE
-        if (i === 100) {
-            i = 0;
-
+        if (chrono === requiredChrono) {
             currentStart = routes[currentRoute];
-            nextStart = routes[currentRoute + 1]
+            nextStart = routes[currentRoute + 1];
+
+            chrono = 0;
 
             start = currentStart;
 
-            vectorLng = (nextStart[0] - currentStart[0]) / 100;
-            vectorLat = (nextStart[1] - currentStart[1]) / 100;
-
-            console.log(vectorLng + " " + vectorLat);
+            vectorLng = (nextStart[0] - currentStart[0]) / requiredChrono;
+            vectorLat = (nextStart[1] - currentStart[1]) / requiredChrono;
         }
     }, 10);
 

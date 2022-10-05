@@ -1,10 +1,15 @@
+@font-face {
+    font-family: Cabin;
+    src: url("font/Cabin-Medium.ttf") format("opentype");
+}
+
 body {
     margin: 0;
     padding: 0;
 
     color: white;
 
-    font-family: 'Cabin', serif;
+    font-family: Cabin, serif;
 }
 
 #main {
