@@ -101,7 +101,7 @@ function moveCar(routes) {
 
     let start = currentStart;
 
-    let baseChrono = 100;
+    let baseChrono = 50;
     let baseValue = 0.0235;
 
     let vectorLng = (nextStart[0] - currentStart[0]) / baseChrono;
@@ -110,14 +110,16 @@ function moveCar(routes) {
     let chrono = 0;
     let requiredChrono = getChrono(currentStart, nextStart, baseValue, baseChrono);
 
-    console.log(baseValue);
-
     let interval = window.setInterval(function () {
         chrono++;
 
         start = [start[0] + vectorLng, start[1] + vectorLat];
 
-        car.setLngLat(start);
+        try {
+            car.setLngLat(start);
+        } catch (e) {
+
+        }
 
         // ROUTE FINIE
         if (chrono === requiredChrono) {
@@ -131,12 +133,11 @@ function moveCar(routes) {
         }
 
         // ROUTE FINIE
-        if (chrono === requiredChrono) {
+        if (chrono >= requiredChrono) {
             currentStart = routes[currentRoute];
             nextStart = routes[currentRoute + 1];
 
             requiredChrono = getChrono(currentStart, nextStart, baseValue, baseChrono);
-            console.log(requiredChrono);
 
             chrono = 0;
 
