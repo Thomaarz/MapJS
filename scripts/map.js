@@ -62,26 +62,81 @@ function addMarker(position) {
     markers.push(marker);
 }
 
+function moveCar2(routes) {
+    let currentRoute = 0;
+
+    let currentStart = routes[currentRoute];
+    let nextStart = routes[currentRoute + 1];
+
+    const car = new mapboxgl.Marker()
+        .setLngLat([currentStart[0], currentStart[1]])
+        .addTo(map);
+
+    let start = currentStart;
+
+    let vectorLng = (nextStart[0] - currentStart[0]) / 100;
+    let vectorLat = (nextStart[1] - currentStart[1]) / 100;
+
+    let i = 0;
+    let interval = window.setInterval(function () {
+        i++;
+
+        start = [start[0] + vectorLng, start[1] + vectorLat];
+
+        car.setLngLat(start);
+
+        // ROUTE FINIE
+        if (i === 100) {
+            currentRoute++;
+        }
+
+        // TOUTES ROUTES FINIES
+        if (currentRoute + 1 === routes.length) {
+            window.clearInterval(interval);
+            return;
+        }
+
+        // ROUTE FINIE
+        if (i === 100) {
+            i = 0;
+
+            currentStart = routes[currentRoute];
+            nextStart = routes[currentRoute + 1]
+
+            start = currentStart;
+
+            vectorLng = (nextStart[0] - currentStart[0]) / 100;
+            vectorLat = (nextStart[1] - currentStart[1]) / 100;
+
+            console.log(vectorLng + " " + vectorLat);
+        }
+    }, 10);
+
+}
+
 function moveCar(routes) {
 
     let current = routes[0];
     let next = routes[1];
     let i = 0;
 
-    let currentLng = current[0];
-    let currentLat = current[1];
-
     const car = new mapboxgl.Marker()
-        .setLngLat([currentLng, currentLat])
+        .setLngLat([current[0], current[1]])
         .addTo(map);
 
     let intervalA = window.setInterval(function() {
 
         let a = 0;
-        var lng = (next[0] - current[0]) / 100;
-        var lat = (next[1] - current[1]) / 100;
+
+        let currentLng = current[0];
+        let currentLat = current[1];
 
         let intervalB = window.setInterval(function () {
+
+
+            let lng = (next[0] - current[0]) / 100;
+            let lat = (next[1] - current[1]) / 100;
+
             a++;
 
             currentLng += lng;
@@ -95,14 +150,12 @@ function moveCar(routes) {
                     current = next;
                     next = routes[i];
 
-                    lng = (next[0] - current[0]) / 100;
-                    lat = (next[1] - current[1]) / 100;
-
-                    car.setLngLat([next[0], next[1]]);
+                    //car.setLngLat([next[0], next[1]]);
                     window.clearInterval(intervalB);
                 } catch (error) {
-                    window.clearInterval(intervalB);
+
                 }
+                window.clearInterval(intervalB);
             }
         }, 10);
         i++;
@@ -141,7 +194,7 @@ async function createRoadLines(origin, destination) {
         ]
     };
 
-    moveCar(coords);
+    moveCar2(coords);
 
     routes.push(route);
 

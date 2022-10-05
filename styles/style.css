@@ -68,6 +68,10 @@ body {
     z-index: -1;
 }
 
+.marker {
+    transition: all 1s ease-in-out;
+}
+
 @media(max-width: 1080px) {
     #forms {
         flex-direction: column;
