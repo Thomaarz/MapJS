@@ -41,7 +41,7 @@ function createTraficLights() {
 }
 
 function placeTraficLight(traficLight) {
-    var circle = new MapboxCircle({lat: traficLight.lat, lng: traficLight.lng}, 5, {
+    var circle = new MapboxCircle({lat: traficLight.lat, lng: traficLight.lng}, 10, {
         id: "circle",
         editable: false,
         minRadius: 5,
@@ -69,7 +69,27 @@ function getValue(start, end) {
     return Math.abs(vectorLng) + Math.abs(vectorLat);
 }
 
-function moveCar2(routes) {
+function getChrono(start, end, baseValue, baseChrono) {
+    let requiredValue = getValue(start, end);
+    return Math.floor((requiredValue * baseChrono) / baseValue);
+}
+
+function getNearTraficLight(position) {
+    for (let i = 0; i < traficLights.length; i++) {
+        let traficLight = traficLights[i];
+
+        if (distance([traficLight.lng, traficLight.lat], [position[0], position[1]]) < 0.0003) {
+            return traficLight;
+        }
+    }
+    return null;
+}
+
+function distance(pos1, pos2) {
+    return Math.abs(pos1[0] - pos2[0] + pos1[1] - pos2[1]);
+}
+
+function moveCar(routes) {
     let currentRoute = 0;
 
     let currentStart = routes[currentRoute];
@@ -81,11 +101,16 @@ function moveCar2(routes) {
 
     let start = currentStart;
 
-    let vectorLng = (nextStart[0] - currentStart[0]) / 100;
-    let vectorLat = (nextStart[1] - currentStart[1]) / 100;
+    let baseChrono = 100;
+    let baseValue = 0.0235;
+
+    let vectorLng = (nextStart[0] - currentStart[0]) / baseChrono;
+    let vectorLat = (nextStart[1] - currentStart[1]) / baseChrono;
 
     let chrono = 0;
-    let requiredChrono = 100;
+    let requiredChrono = getChrono(currentStart, nextStart, baseValue, baseChrono);
+
+    console.log(baseValue);
 
     let interval = window.setInterval(function () {
         chrono++;
@@ -110,6 +135,9 @@ function moveCar2(routes) {
             currentStart = routes[currentRoute];
             nextStart = routes[currentRoute + 1];
 
+            requiredChrono = getChrono(currentStart, nextStart, baseValue, baseChrono);
+            console.log(requiredChrono);
+
             chrono = 0;
 
             start = currentStart;
@@ -117,62 +145,8 @@ function moveCar2(routes) {
             vectorLng = (nextStart[0] - currentStart[0]) / requiredChrono;
             vectorLat = (nextStart[1] - currentStart[1]) / requiredChrono;
         }
+
     }, 10);
-
-}
-
-function moveCar(routes) {
-
-    let current = routes[0];
-    let next = routes[1];
-    let i = 0;
-
-    const car = new mapboxgl.Marker()
-        .setLngLat([current[0], current[1]])
-        .addTo(map);
-
-    let intervalA = window.setInterval(function() {
-
-        let a = 0;
-
-        let currentLng = current[0];
-        let currentLat = current[1];
-
-        let intervalB = window.setInterval(function () {
-
-
-            let lng = (next[0] - current[0]) / 100;
-            let lat = (next[1] - current[1]) / 100;
-
-            a++;
-
-            currentLng += lng;
-            currentLat += lat;
-
-            car.setLngLat([currentLng + lng, currentLat + lat]);
-
-            if (a === 100) {
-                try {
-                    a = 0;
-                    current = next;
-                    next = routes[i];
-
-                    //car.setLngLat([next[0], next[1]]);
-                    window.clearInterval(intervalB);
-                } catch (error) {
-
-                }
-                window.clearInterval(intervalB);
-            }
-        }, 10);
-        i++;
-
-        if (i >= routes.length) {
-            window.clearInterval(intervalB);
-            window.clearInterval(intervalA);
-        }
-
-    }, 1000);
 
 }
 
@@ -201,7 +175,7 @@ async function createRoadLines(origin, destination) {
         ]
     };
 
-    moveCar2(coords);
+    moveCar(coords);
 
     routes.push(route);
 
